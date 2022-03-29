@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Custom Rules for StyleCop.Analyzers" Description="Custom Rules for StyleCop.Analyzers" ToolsVersion="14.0">
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!-- Two sibling elements which each start on their own line have different levels of indentation.-->
+    <Rule Id="SA1137" Action="None" />
+    <!-- Elements should have the same indentation -->
+    <Rule Id="SA1119" Action="None" />
+    <!-- StatementMustNotUseUnnecessaryParenthesis - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1119.md -->
+    <Rule Id="SA1027" Action="None" />
+	<!-- SA1027UseTabsCorrectly - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1027.md -->
+	<Rule Id="SA1400" Action="None" />
+    <!-- AccessModifierMustBeDeclared - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1400.md -->
+    <Rule Id="SA1513" Action="None" />
+    <!-- ClosingBraceMustBeFollowedByBlankLine - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1513.md -->
+    <!--<Rule Id="SA1200" Action="None" />-->
+    <!-- SA1200UsingDirectivesMustBePlacedCorrectly - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1200.md -->
+    <Rule Id="SA1633" Action="None" />
+    <!-- SA1633FileMustHaveHeader - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1633.md -->
+    <Rule Id="SA1101" Action="None" />
+    <!-- SA1101PrefixLocalCallsWithThis - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1101.md -->
+    <Rule Id="SA1127" Action="None" />
+    <!-- SA1127GenericTypeConstraintsMustBeOnOwnLine - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1127.md -->
+    <Rule Id="SA1503" Action="None" />
+    <!-- SA1503BracesMustNotBeOmitted - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1503.md -->
+    <Rule Id="SA1501" Action="None" />
+    <!-- SA1501StatementMustNotBeOnSingleLine - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1501.md -->
+    <Rule Id="SA1124" Action="None" />
+    <!-- SA1124DoNotUseRegions - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1124.md -->
+    <Rule Id="SA1128" Action="None" />
+    <!-- SA1128ConstructorInitializerMustBeOnOwnLine - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1128.md -->
+    <Rule Id="SA1518" Action="None" />
+    <!-- SA1518UseLineEndingsCorrectlyAtEndOfFile - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1518.md -->
+    <Rule Id="SA1028" Action="None" />
+    <!-- SA1028CodeMustNotContainTrailingWhitespace - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1028.md -->
+	<Rule Id="SA1201" Action="None" />
+	<!-- SA1201ElementsMustAppearInTheCorrectOrder - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1201.md -->
+	<Rule Id="SA1413" Action="None" />
+	<!-- SA1413UseTrailingCommasInMultiLineInitializers - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1413.md -->
+	<Rule Id="SA1117" Action="None" />
+	<!-- SA1117ParametersMustBeOnSameLineOrSeparateLines - https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1117.md -->
+	<Rule Id="AD0001" Action="None" />
+  </Rules>
+</RuleSet>

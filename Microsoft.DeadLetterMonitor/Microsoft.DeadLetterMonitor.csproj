@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>14dcf77e-3f2b-4d0a-b161-79e705123d28</UserSecretsId>
+  </PropertyGroup>
+
+  <Import Project="..\Build\Shared.Build.proj" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.17.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.13" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.13" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.13" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.13" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.13" />
+    <PackageReference Include="Microsoft.Extensions.Logging.ApplicationInsights" Version="2.17.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.13" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.14" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="..\.dockerignore" Link="Properties\.dockerignore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Connectors\AzureServiceBus\" />
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
+</Project>
