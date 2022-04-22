@@ -2,7 +2,6 @@
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using RabbitClient = RabbitMQ.Client;
 
 namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
