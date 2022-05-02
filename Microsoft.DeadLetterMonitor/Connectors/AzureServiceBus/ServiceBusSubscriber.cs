@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
-    class ServiceBusConsumer : IConsumer {
+namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
+    class ServiceBusSubscriber : ISubscriber {
 
         private event EventHandler<IMessage> Received;
+        private bool autoAck;
 
         /// <summary>
         /// Consumer constructor
@@ -16,9 +17,10 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         /// <param name="queueName">Queue to subscribe</param>
         /// <param name="handler">Handler for Message</param>
         /// <param name="autoAck">AutoAck message</param>
-        public ServiceBusConsumer(ServiceBusClient sbClient, string queueName, Action<IMessage> handler, bool autoAck) {
+        public ServiceBusSubscriber(ServiceBusClient sbClient, string queueName, Action<IMessage> handler, bool autoAck) {
 
             Received += (sender, message) => { handler(message); };
+            this.autoAck = autoAck;
 
             var sbProcessor = sbClient.CreateProcessor("topicName", queueName, new ServiceBusProcessorOptions());
 
@@ -33,7 +35,7 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         }
 
         // handle received messages
-        private Task MessageHandler(ProcessMessageEventArgs args)
+        private async Task MessageHandler(ProcessMessageEventArgs args)
         {
             // just transform into Message and trigger event Received
             var msg = new Message(args.Message.MessageId, args.Message.EnqueuedTime.ToString(),
@@ -44,9 +46,8 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
             Received.Invoke(args, msg);
 
             // complete the message. messages is deleted from the subscription. 
-            //await args.CompleteMessageAsync(args.Message);
-
-            return Task.CompletedTask;
+            if (autoAck)
+                await args.CompleteMessageAsync(args.Message);
         }
 
         // handle any errors when receiving messages

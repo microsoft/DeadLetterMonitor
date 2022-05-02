@@ -45,6 +45,7 @@ namespace Microsoft.DeadLetterMonitor.EventProcessor {
                {
                    services.AddApplicationInsightsTelemetryWorkerService();
 
+                   // RabbitMQ Implementation
                    services.AddSingleton<IConnection>(sp =>
                    {
                        return new Connectors.RabbitMQ.RabbitConnection(
@@ -53,6 +54,13 @@ namespace Microsoft.DeadLetterMonitor.EventProcessor {
                            hostContext.Configuration.GetValue<int>("RabbitMQ:Port"),
                            hostContext.Configuration.GetValue<string>("RabbitMQ:Username"),
                            hostContext.Configuration.GetValue<string>("RabbitMQ:Password"));
+                   });
+
+                   // Azure Service Bus Implementation
+                   services.AddSingleton<IConnection>(sp =>
+                   {
+                       return new Connectors.AzureServiceBus.ServiceBusConnection(
+                           hostContext.Configuration.GetValue<string>("AzureServiceBus:Connection"));
                    });
 
                    services.AddScoped<IHostedService, TimedHostedService>();

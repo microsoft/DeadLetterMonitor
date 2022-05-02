@@ -4,7 +4,7 @@ using Microsoft.DeadLetterMonitor.Handlers;
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
+namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
 
     /// <summary>
     /// RabbitMQ implementation for IChannel
@@ -28,6 +28,8 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         public void TopicDeclare(string name)
         {
             // MISSING: sbMgmtClient.Topics.CreateOrUpdateAsync(...);
+            // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
+
             throw new NotImplementedException();
         }
 
@@ -35,6 +37,8 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         public void QueueDeclare(string name, IDictionary<string, object>? args = null)
         {
             // MISSING: sbMgmtClient.Queues.CreateOrUpdateAsync(...);
+            // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
+
             throw new NotImplementedException();
         }
 
@@ -42,6 +46,8 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         public void QueueBind(string topicName, string queueName)
         {
             // MISSING: Does this exist in ServiceBus???
+            // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
+
             throw new NotImplementedException();
         }
 
@@ -57,9 +63,9 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         }
 
         ///<inheritdoc/>
-        public IConsumer Subscribe(string queueName, Action<IMessage> handler, bool autoAck)
+        public ISubscriber Subscribe(string queueName, Action<IMessage> handler, bool autoAck)
         {
-            return new ServiceBusConsumer(sbClient, queueName, handler, autoAck);
+            return new ServiceBusSubscriber(sbClient, queueName, handler, autoAck);
         }
 
     }

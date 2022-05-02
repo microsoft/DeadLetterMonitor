@@ -53,9 +53,9 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         }
 
         ///<inheritdoc/>
-        public IConsumer Subscribe(string queueName, Action<IMessage> handler, bool autoAck)
+        public ISubscriber Subscribe(string queueName, Action<IMessage> handler, bool autoAck)
         {
-            return new RabbitConsumer(model, queueName, handler, autoAck);
+            return new RabbitSubscriber(model, queueName, handler, autoAck);
         }
 
     }

@@ -1,14 +1,12 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Management.ServiceBus;
 
-namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
+namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
     
     /// <summary>
     /// ServiceBus implementation of IConnection
     /// </summary>
-    public class ServiceBus : IConnection {
-
-        // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
+    public class ServiceBusConnection : IConnection {
 
         private readonly ServiceBusClient sbClient;
         private readonly ServiceBusManagementClient sbMgmtClient;
@@ -16,8 +14,8 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         /// <summary>
         /// Creates a new Azure ServiceBus Client and Management Client
         /// </summary>
-        public ServiceBus(string connection) {
-            sbClient = new ServiceBusClient(connection);
+        public ServiceBusConnection(string connectionString) {
+            sbClient = new ServiceBusClient(connectionString);
             sbMgmtClient = new ServiceBusManagementClient(new Rest.TokenCredentials("xxx"));
         }
 
