@@ -3,12 +3,13 @@ using Microsoft.DeadLetterMonitor.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
     class ServiceBusSubscriber : ISubscriber {
 
         private event EventHandler<IMessage> Received;
-        private bool autoAck;
+        private readonly string routingKey;
 
         /// <summary>
         /// Consumer constructor
@@ -20,9 +21,9 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
         public ServiceBusSubscriber(ServiceBusClient sbClient, string queueName, Action<IMessage> handler, bool autoAck) {
 
             Received += (sender, message) => { handler(message); };
-            this.autoAck = autoAck;
+            routingKey = queueName;
 
-            var sbProcessor = sbClient.CreateProcessor("topicName", queueName, new ServiceBusProcessorOptions());
+            var sbProcessor = sbClient.CreateProcessor(queueName, new ServiceBusProcessorOptions { AutoCompleteMessages = autoAck});
 
             // add handler to process messages
             sbProcessor.ProcessMessageAsync += MessageHandler;
@@ -38,16 +39,18 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
         private async Task MessageHandler(ProcessMessageEventArgs args)
         {
             // just transform into Message and trigger event Received
-            var msg = new Message(args.Message.MessageId, args.Message.EnqueuedTime.ToString(),
-                                  args.Message.ContentType, "ea.Exchange", "ea.RoutingKey",
-                                  args.Message.CorrelationId, new Dictionary<string, object>(), 
+            var msg = new Message(args.Message.MessageId, 
+                                  args.Message.EnqueuedTime.ToString(),
+                                  args.Message.ContentType, 
+                                  string.Empty,
+                                  routingKey,
+                                  args.Message.CorrelationId,
+                                  (IDictionary<string, object>)args.Message.ApplicationProperties, 
                                   args.Message.Body.ToArray());
             
             Received.Invoke(args, msg);
 
-            // complete the message. messages is deleted from the subscription. 
-            if (autoAck)
-                await args.CompleteMessageAsync(args.Message);
+            await args.CompleteMessageAsync(args.Message);
         }
 
         // handle any errors when receiving messages

@@ -28,9 +28,14 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         private void MessageHandler(object? sender, BasicDeliverEventArgs ea)
         {
             // just transform into Message and trigger event Received
-            var msg = new Message(ea.BasicProperties.MessageId, ea.BasicProperties.Timestamp.ToString(), 
-                                  ea.BasicProperties.Type, ea.Exchange, ea.RoutingKey, 
-                                  ea.BasicProperties.CorrelationId, ea.BasicProperties.Headers, ea.Body);
+            var msg = new Message(ea.BasicProperties.MessageId, 
+                                  ea.BasicProperties.Timestamp.ToString(), 
+                                  ea.BasicProperties.Type, 
+                                  ea.Exchange, 
+                                  ea.RoutingKey, 
+                                  ea.BasicProperties.CorrelationId, 
+                                  ea.BasicProperties.Headers, 
+                                  ea.Body);
             
             Received.Invoke(sender, msg);
         }

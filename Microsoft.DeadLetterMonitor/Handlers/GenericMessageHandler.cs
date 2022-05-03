@@ -37,6 +37,7 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
             // Read death information header
             var firstDeathExchange = message.GetHeaderValue("x-first-death-exchange");
             var firstDeathReason = message.GetHeaderValue("x-first-death-reason");
+            var deathCount = message.GetHeaderValue("x-death-count");
             var messageType = message.Type;
 
             // The original exchange and is necessary to redirect the message
@@ -46,19 +47,9 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
             }
 
             // The death info is necessary to redirect the message
-            if (!message.Headers.ContainsKey("x-death"))
+            if (string.IsNullOrEmpty(deathCount)) 
             {
                 throw new ArgumentException("Could not find death header in message. Possibly tried to handle a message that was not dead.");
-            }
-
-            // Get count of first death - only use count of deaths in a single queue 
-            // If message was deadlettered in several queues, use first queue only as reference
-            List<object> death = (List<object>)message.Headers["x-death"];
-
-            // The death info is necessary to redirect the message
-            if (death == null || death.Count == 0)
-            {
-                throw new ArgumentException("Could not find death info in message. Possibly tried to handle a message that was not dead.");
             }
 
             // tracing in AppInsights in the context of the parent operation
@@ -68,7 +59,7 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
 
             try
             {
-                var firstDeathCount = (long) ((Dictionary<string, object>)death[0])["count"];
+                int.TryParse(deathCount, out int firstDeathCount);
 
                 Helpers.Telemetry.Trace(telemetryClient, messageType, "received", message.Topic, message.RoutingKey, $"Event received from {firstDeathExchange} because {firstDeathReason}.");
 

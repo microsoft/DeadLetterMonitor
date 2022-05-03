@@ -45,23 +45,28 @@ namespace Microsoft.DeadLetterMonitor.EventProcessor {
                {
                    services.AddApplicationInsightsTelemetryWorkerService();
 
-                   // RabbitMQ Implementation
-                   services.AddSingleton<IConnection>(sp =>
-                   {
-                       return new Connectors.RabbitMQ.RabbitConnection(
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:NodesHostNames"),
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:VHost"),
-                           hostContext.Configuration.GetValue<int>("RabbitMQ:Port"),
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:Username"),
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:Password"));
-                   });
+                   string messageBus = hostContext.Configuration.GetValue<string>("MessageBus");
 
-                   // Azure Service Bus Implementation
-                   services.AddSingleton<IConnection>(sp =>
+                   if (messageBus.Equals("AzureServiceBus"))
                    {
-                       return new Connectors.AzureServiceBus.ServiceBusConnection(
-                           hostContext.Configuration.GetValue<string>("AzureServiceBus:Connection"));
-                   });
+                       services.AddSingleton<IConnection>(sp =>
+                       {
+                           return new Connectors.AzureServiceBus.ServiceBusConnection(
+                               hostContext.Configuration.GetValue<string>("AzureServiceBus:Connection"));
+                       });
+                   }
+                   else if (messageBus.Equals("RabbitMQ"))
+                   {
+                       services.AddSingleton<IConnection>(sp =>
+                       {
+                           return new Connectors.RabbitMQ.RabbitConnection(
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:NodesHostNames"),
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:VHost"),
+                               hostContext.Configuration.GetValue<int>("RabbitMQ:Port"),
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:Username"),
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:Password"));
+                       });
+                   }
 
                    services.AddScoped<IHostedService, TimedHostedService>();
                    services.AddScoped<IGenericMessageHandler, GenericMessageHandler>();

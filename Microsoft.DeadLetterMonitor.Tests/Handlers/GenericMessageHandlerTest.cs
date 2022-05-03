@@ -219,7 +219,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { ParkingLotExchangeName = "pakinglotexhange", MaxRetries = 2, Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { ParkingLotExchangeName = "pakinglot.exhange", MaxRetries = 2, Rules = rulesOptions };
 
             var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
             mockOptions.Setup(c => c.Value).Returns(options);
@@ -264,7 +264,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { ParkingLotExchangeName = "pakinglotexhange", MaxRetries = 2, Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { ParkingLotExchangeName = "pakinglot.exhange", MaxRetries = 2, Rules = rulesOptions };
 
             var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
             mockOptions.Setup(c => c.Value).Returns(options);
@@ -297,7 +297,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { ParkingLotExchangeName = "pakinglotexhange", MaxRetries = 2, Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { ParkingLotExchangeName = "pakinglot.exhange", MaxRetries = 2, Rules = rulesOptions };
 
             var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
             mockOptions.Setup(c => c.Value).Returns(options);
@@ -323,15 +323,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             message.Headers.Add("x-first-death-exchange", Encoding.UTF8.GetBytes(exchangeName));
             message.Headers.Add("x-first-death-reason", Encoding.UTF8.GetBytes(reason));
-
-            // death info (count)
-            var death = new Dictionary<string, object>
-            {
-                { "count", retries }
-            };
-
-            message.Headers.Add("x-death", new List<object>() { death });
-
+            message.Headers.Add("x-death-count", Encoding.UTF8.GetBytes(retries.ToString()));
             return message;
         }
     }

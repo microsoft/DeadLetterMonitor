@@ -29,8 +29,6 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
         {
             // MISSING: sbMgmtClient.Topics.CreateOrUpdateAsync(...);
             // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
-
-            throw new NotImplementedException();
         }
 
         ///<inheritdoc/>
@@ -38,8 +36,6 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
         {
             // MISSING: sbMgmtClient.Queues.CreateOrUpdateAsync(...);
             // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
-
-            throw new NotImplementedException();
         }
 
         ///<inheritdoc/>
@@ -47,19 +43,26 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
         {
             // MISSING: Does this exist in ServiceBus???
             // readme: https://github.com/Azure-Samples/service-bus-dotnet-management/blob/master/src/service-bus-dotnet-management/ServiceBusManagementSample.cs
-
-            throw new NotImplementedException();
         }
 
         ///<inheritdoc/>
-        public void Publish(string topicName, string routingKey, IMessage message)
+        public async void Publish(string topicName, string routingKey, IMessage message)
         {
             var sender = sbClient.CreateSender(topicName);
             var sbMessage = new ServiceBusMessage(message.Body);
 
+            sbMessage.MessageId = message.Id;
+            sbMessage.CorrelationId = message.CorrelationId;
+            sbMessage.ContentType = message.Type;
+            
+            foreach (var header in message.Headers) {
+                sbMessage.ApplicationProperties.Add(header.Key, header.Value);
+            }
+
             // ATT: missing routing key
             // model.BasicPublish(topicName, routingKey, true, props, message.Body);
-            sender.SendMessageAsync(sbMessage);
+            
+            await sender.SendMessageAsync(sbMessage);
         }
 
         ///<inheritdoc/>
