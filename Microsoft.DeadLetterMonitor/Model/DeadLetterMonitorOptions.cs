@@ -35,7 +35,7 @@
         /// <value>
         /// The name of the delayed exchange.
         /// </value>
-        public string DelayedExchangeName { get; set; } = string.Empty;
+        public string DelayedTopicName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the delayed queue.
@@ -51,7 +51,7 @@
         /// <value>
         /// The name of the delayed dead letter exchange.
         /// </value>
-        public string DelayedDeadLetterExchangeName { get; set; } = string.Empty;
+        public string DelayedDeadLetterTopicName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the delayed dead letter queue.
@@ -67,7 +67,7 @@
         /// <value>
         /// The name of the parking lot exchange.
         /// </value>
-        public string ParkingLotExchangeName { get; set; } = string.Empty;
+        public string ParkingLotTopicName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the parking lot queue.

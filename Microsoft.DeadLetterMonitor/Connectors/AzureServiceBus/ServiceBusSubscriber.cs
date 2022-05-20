@@ -10,6 +10,7 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
 
         private event EventHandler<IMessage> Received;
         private readonly string routingKey;
+        private readonly string queueName;
 
         /// <summary>
         /// Consumer constructor
@@ -21,9 +22,10 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
         public ServiceBusSubscriber(ServiceBusClient sbClient, string queueName, Action<IMessage> handler, bool autoAck) {
 
             Received += (sender, message) => { handler(message); };
-            routingKey = queueName;
+            this.routingKey = queueName;
+            this.queueName = queueName;
 
-            var sbProcessor = sbClient.CreateProcessor(queueName, new ServiceBusProcessorOptions { AutoCompleteMessages = autoAck});
+            var sbProcessor = sbClient.CreateProcessor(queueName, new ServiceBusProcessorOptions { AutoCompleteMessages = autoAck, SubQueue = SubQueue.DeadLetter });
 
             // add handler to process messages
             sbProcessor.ProcessMessageAsync += MessageHandler;
@@ -47,7 +49,12 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
                                   args.Message.CorrelationId,
                                   (IDictionary<string, object>)args.Message.ApplicationProperties, 
                                   args.Message.Body.ToArray());
-            
+
+            // Read death information header
+            msg.FirstDeathTopic = this.queueName;
+            msg.FirstDeathReason = args.Message.DeadLetterReason;
+            msg.DeathCount = args.Message.DeliveryCount;
+
             Received.Invoke(args, msg);
 
             await args.CompleteMessageAsync(args.Message);

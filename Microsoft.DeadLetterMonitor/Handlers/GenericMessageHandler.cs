@@ -34,22 +34,16 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         /// <inheritdoc/>
         public void HandleMessage(IMessage message)
         {
-            // Read death information header
-            var firstDeathExchange = message.GetHeaderValue("x-first-death-exchange");
-            var firstDeathReason = message.GetHeaderValue("x-first-death-reason");
-            var deathCount = message.GetHeaderValue("x-death-count");
-            var messageType = message.Type;
-
             // The original exchange and is necessary to redirect the message
-            if (string.IsNullOrEmpty(firstDeathExchange) || string.IsNullOrEmpty(firstDeathReason))
+            if (string.IsNullOrEmpty(message.FirstDeathTopic) || string.IsNullOrEmpty(message.FirstDeathReason))
             {
                 throw new ArgumentException("Could not find original exchange or reason in message. Possibly tried to handle a message that was not dead.");
             }
 
             // The death info is necessary to redirect the message
-            if (string.IsNullOrEmpty(deathCount)) 
+            if (!message.DeathCount.HasValue) 
             {
-                throw new ArgumentException("Could not find death header in message. Possibly tried to handle a message that was not dead.");
+                throw new ArgumentException("Could not find death info in message. Possibly tried to handle a message that was not dead.");
             }
 
             // tracing in AppInsights in the context of the parent operation
@@ -59,15 +53,13 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
 
             try
             {
-                int.TryParse(deathCount, out int firstDeathCount);
-
-                Helpers.Telemetry.Trace(telemetryClient, messageType, "received", message.Topic, message.RoutingKey, $"Event received from {firstDeathExchange} because {firstDeathReason}.");
+                Helpers.Telemetry.Trace(telemetryClient, message.Type, "received", message.Topic, message.RoutingKey, $"Event received from {message.FirstDeathTopic} because {message.FirstDeathReason}.");
 
                 // Discard: check if this message should be discarded
-                if (RuleMatches(firstDeathExchange, messageType, firstDeathReason, options.Rules.DiscardRules))
+                if (RuleMatches(message.FirstDeathTopic, message.Type, message.FirstDeathReason, options.Rules.DiscardRules))
                 {
                     // Discard message - will ack the message and remove from queue
-                    Helpers.Telemetry.Trace(telemetryClient, messageType, "discarded", message.Topic, message.RoutingKey, "Event discarded by rule.");
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "discarded", message.Topic, message.RoutingKey, "Event discarded by rule.");
                     return;
                 }
 
@@ -75,26 +67,26 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
                 // Get configuration info
                 var maxRetries = options.MaxRetries;
 
-                if (firstDeathCount >= maxRetries || RuleMatches(firstDeathExchange, messageType, firstDeathReason, options.Rules.ParkRules))
+                if (message.DeathCount >= maxRetries || RuleMatches(message.FirstDeathTopic, message.Type, message.FirstDeathReason, options.Rules.ParkRules))
                 {
                     // Send to parking lot
-                    genericPublisher.Publish(options.ParkingLotExchangeName, message.RoutingKey, message, true);
-                    Helpers.Telemetry.Trace(telemetryClient, messageType, "parked", message.Topic, message.RoutingKey, "Event sent to parking lot exchange.");
+                    genericPublisher.Publish(options.ParkingLotTopicName, message.RoutingKey, message, true);
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "parked", message.Topic, message.RoutingKey, "Event sent to parking lot exchange.");
                     return;
                 }
 
                 // Retry: check if this message should be retried
-                if (RuleMatches(firstDeathExchange, messageType, firstDeathReason, options.Rules.RetryRules))
+                if (RuleMatches(message.FirstDeathTopic, message.Type, message.FirstDeathReason, options.Rules.RetryRules))
                 {
                     // Send to delayed queue
-                    genericPublisher.Publish(options.DelayedExchangeName, message.RoutingKey, message);
-                    Helpers.Telemetry.Trace(telemetryClient, messageType, "delayed", message.Topic, message.RoutingKey, "Event sent to delayed exchange by rule.");
+                    genericPublisher.Publish(options.DelayedTopicName, message.RoutingKey, message);
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "delayed", message.Topic, message.RoutingKey, "Event sent to delayed exchange by rule.");
                     return;
                 }
 
                 // Park message - default behaviour
-                genericPublisher.Publish(options.ParkingLotExchangeName, message.RoutingKey, message, true);
-                Helpers.Telemetry.Trace(telemetryClient, messageType, "parked", message.Topic, message.RoutingKey, "Event sent to parking lot by default behaviour.");
+                genericPublisher.Publish(options.ParkingLotTopicName, message.RoutingKey, message, true);
+                Helpers.Telemetry.Trace(telemetryClient, message.Type, "parked", message.Topic, message.RoutingKey, "Event sent to parking lot by default behaviour.");
             }
             finally
             {

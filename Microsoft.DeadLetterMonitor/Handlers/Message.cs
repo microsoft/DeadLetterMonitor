@@ -34,6 +34,15 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         public int? Delay { get; set; }
 
         /// <inheritdoc/>
+        public string? FirstDeathTopic { get; set; }
+
+        /// <inheritdoc/>
+        public string? FirstDeathReason { get; set; }
+
+        /// <inheritdoc/>
+        public int? DeathCount { get; set; }
+
+        /// <inheritdoc/>
         public IDictionary<string, object> Headers { get; set; }
 
         /// <inheritdoc/>

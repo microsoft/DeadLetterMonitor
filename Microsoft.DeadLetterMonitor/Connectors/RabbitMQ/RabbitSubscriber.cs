@@ -36,7 +36,12 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
                                   ea.BasicProperties.CorrelationId, 
                                   ea.BasicProperties.Headers, 
                                   ea.Body);
-            
+
+            // Read death information header
+            msg.FirstDeathTopic = msg.GetHeaderValue("x-first-death-exchange");
+            msg.FirstDeathReason = msg.GetHeaderValue("x-first-death-reason");
+            msg.DeathCount = string.IsNullOrEmpty(msg.GetHeaderValue("x-death-count"))?null: (int?)int.Parse(msg.GetHeaderValue("x-death-count")!);
+
             Received.Invoke(sender, msg);
         }
     }
