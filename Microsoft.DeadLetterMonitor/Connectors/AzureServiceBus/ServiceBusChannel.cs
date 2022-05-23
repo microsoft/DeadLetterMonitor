@@ -51,7 +51,6 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
             var sender = sbClient.CreateSender(topicName);
             var sbMessage = new ServiceBusMessage(message.Body);
 
-            sbMessage.MessageId = message.Id;
             sbMessage.CorrelationId = message.CorrelationId;
             sbMessage.ContentType = message.Type;
             

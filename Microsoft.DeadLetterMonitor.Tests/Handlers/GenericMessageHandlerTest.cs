@@ -29,7 +29,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions, ParkingLotTopicName = "topic1" };
 
             var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
             mockOptions.Setup(c => c.Value).Returns(options);
@@ -42,7 +42,9 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var message = new Message("1", DateTime.UtcNow.ToString(), "type1", "topic1", "key", null, new Dictionary<string, object>(), body);
 
-            Assert.ThrowsException<ArgumentException>(() => handler.HandleMessage(message));
+            handler.HandleMessage(message);
+
+            Assert.AreEqual(1, mockPublisher.PublishedMessages.Count(m => m == "topic1"));
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions, ParkingLotTopicName = "topic1" };
 
             var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
             mockOptions.Setup(c => c.Value).Returns(options);
@@ -76,7 +78,9 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
             message.Headers.Add("x-first-death-exchange", Encoding.UTF8.GetBytes("dummy"));
             message.Headers.Add("x-first-death-reason", Encoding.UTF8.GetBytes("dummy"));
 
-            Assert.ThrowsException<ArgumentException>(() => handler.HandleMessage(message));
+            handler.HandleMessage(message);
+
+            Assert.AreEqual(1, mockPublisher.PublishedMessages.Count(m => m == "topic1"));
         }
 
         /// <summary>
@@ -94,7 +98,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions, ParkingLotTopicName = "topic1" };
 
             var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
             mockOptions.Setup(c => c.Value).Returns(options);
@@ -111,7 +115,9 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
             message.Headers.Add("x-first-death-reason", Encoding.UTF8.GetBytes("dummy"));
             message.Headers.Add("x-death", null);
 
-            Assert.ThrowsException<ArgumentException>(() => handler.HandleMessage(message));
+            handler.HandleMessage(message);
+
+            Assert.AreEqual(1, mockPublisher.PublishedMessages.Count(m => m == "topic1"));
         }
 
         /// <summary>

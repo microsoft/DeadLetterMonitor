@@ -34,18 +34,7 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         /// <inheritdoc/>
         public void HandleMessage(IMessage message)
         {
-            // The original topic and is necessary to redirect the message
-            if (string.IsNullOrEmpty(message.FirstDeathTopic) || string.IsNullOrEmpty(message.FirstDeathReason))
-            {
-                throw new ArgumentException("Could not find original topic or reason in message. Possibly tried to handle a message that was not dead.");
-            }
-
-            // The death info is necessary to redirect the message
-            if (!message.DeathCount.HasValue) 
-            {
-                throw new ArgumentException("Could not find death info in message. Possibly tried to handle a message that was not dead.");
-            }
-
+            
             // tracing in AppInsights in the context of the parent operation
             var telemetry = new DependencyTelemetry { Type = "Event", Name = AppDomain.CurrentDomain.FriendlyName }; 
             telemetry.Context.Operation.Id = message.CorrelationId;
@@ -54,6 +43,28 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
             try
             {
                 Helpers.Telemetry.Trace(telemetryClient, message.Type, "received", message.Topic, message.RoutingKey, $"Event received from {message.FirstDeathTopic} because {message.FirstDeathReason}.");
+
+                // Original topic missing and is necessary to redirect the message
+                if (string.IsNullOrEmpty(message.FirstDeathTopic) || string.IsNullOrEmpty(message.FirstDeathReason))
+                {
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "error", 
+                        message.Topic, message.RoutingKey, "Could not find original topic or reason in message.");
+
+                    // if headers are missing send to parking lot
+                    genericPublisher.Publish(options.ParkingLotTopicName, message.RoutingKey, message, true);
+                    return;
+                }
+
+                // The death info is necessary to redirect the message
+                if (!message.DeathCount.HasValue)
+                {
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "error", 
+                        message.Topic, message.RoutingKey, "Could not find death info in message.");
+                    
+                    // if headers are missing send to parking lot
+                    genericPublisher.Publish(options.ParkingLotTopicName, message.RoutingKey, message, true);
+                    return;
+                }
 
                 // Discard: check if this message should be discarded
                 if (RuleMatches(message.FirstDeathTopic, message.Type, message.FirstDeathReason, options.Rules.DiscardRules))

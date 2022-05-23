@@ -63,6 +63,9 @@ All configurations are stored in `appsettings.json` file.
 | Rules: Retry | List of message filters of messages to be retried until the `MaxRetries` is reached. The messages that match this filter criteria are sent for retry. |
 | Rules: Park | List of message filters of messages to be Parked directly. The messages that match this filter criteria are sent to the parking lot. |
 
+# Supported Message Bus
+The project currently supports Azure Service Bus and RabbitMQ, implemented under namespace `*.Connectors`, for specifying wich connector to use, in AppSettings file, set the appropriate option for MessageBus (`AzureServiceBus` or `RabbitMQ`) and the related settings.
+
 # Contribute
 This project welcomes contributions and suggestions. 
 

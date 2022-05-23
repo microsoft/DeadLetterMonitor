@@ -6,6 +6,8 @@ using System;
 namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
     class RabbitSubscriber : ISubscriber {
 
+        private readonly IModel model;
+
         private event EventHandler<IMessage> Received;
 
         /// <summary>
@@ -17,11 +19,14 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         /// <param name="autoAck">AutoAck message</param>
         public RabbitSubscriber(IModel model, string queueName, Action<IMessage> handler, bool autoAck) {
 
+            this.model = model;
+
             Received += (sender, message) => { handler(message); };
 
             // now just register handler for rabbit as a wrapper
             var consumer = new EventingBasicConsumer(model);
             consumer.Received += (sender, ea) => { MessageHandler(model, ea); };
+
             model.BasicConsume(queueName, autoAck, consumer);
         }
 
@@ -42,7 +47,15 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
             msg.FirstDeathReason = msg.GetHeaderValue("x-first-death-reason");
             msg.DeathCount = string.IsNullOrEmpty(msg.GetHeaderValue("x-death-count"))?null: (int?)int.Parse(msg.GetHeaderValue("x-death-count")!);
 
-            Received.Invoke(sender, msg);
+            try
+            {
+                Received.Invoke(sender, msg);
+                model.BasicAck(ea.DeliveryTag, false);
+            }
+            catch {
+                model.BasicReject(ea.DeliveryTag, true);
+                throw;
+            }
         }
     }
 }

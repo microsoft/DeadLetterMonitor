@@ -44,10 +44,10 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         {
             var props = model.CreateBasicProperties();
             props.Headers = message.Headers;
-            if (message.Id != null) props.MessageId = message.Id;
+            props.DeliveryMode = 2;
+
             if (message.Type != null) props.Type = message.Type;
             if (message.CorrelationId != null) props.CorrelationId = message.CorrelationId;
-            props.DeliveryMode = 2;
 
             model.BasicPublish(topicName, routingKey, true, props, message.Body);
         }

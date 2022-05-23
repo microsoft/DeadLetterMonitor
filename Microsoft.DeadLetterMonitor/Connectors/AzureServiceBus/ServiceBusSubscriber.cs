@@ -3,7 +3,6 @@ using Microsoft.DeadLetterMonitor.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
     class ServiceBusSubscriber : ISubscriber {
@@ -25,7 +24,8 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
             this.routingKey = queueName;
             this.queueName = queueName;
 
-            var sbProcessor = sbClient.CreateProcessor(queueName, new ServiceBusProcessorOptions { AutoCompleteMessages = autoAck, SubQueue = SubQueue.DeadLetter });
+            var sbProcessor = sbClient.CreateProcessor(queueName, 
+                new ServiceBusProcessorOptions { AutoCompleteMessages = autoAck, SubQueue = SubQueue.DeadLetter });
 
             // add handler to process messages
             sbProcessor.ProcessMessageAsync += MessageHandler;
@@ -56,15 +56,13 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
             msg.DeathCount = args.Message.DeliveryCount;
 
             Received.Invoke(args, msg);
-
             await args.CompleteMessageAsync(args.Message);
         }
 
         // handle any errors when receiving messages
         private Task ErrorHandler(ProcessErrorEventArgs args)
         {
-            Console.WriteLine(args.Exception.ToString());
-            return Task.CompletedTask;
+            throw args.Exception;
         }
 
     }

@@ -2,7 +2,9 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DeadLetterMonitor.Handlers;
 using Microsoft.DeadLetterMonitor.Model;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,17 +28,22 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
 
-            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions };
+            DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { Rules = rulesOptions, ParkingLotTopicName = "topic1" };
+
+            var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
+            mockOptions.Setup(c => c.Value).Returns(options);
 
             var mockPublisher = new GenericPublisherMock();
 
-            var handler = new DelayedMessageHandler(mockPublisher, mockAppInsights);
+            var handler = new DelayedMessageHandler(mockOptions.Object, mockPublisher, mockAppInsights);
 
             var body = new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
             var message = new Message("1",  DateTime.UtcNow.ToString(), "type1", "topic1", "key", null, new Dictionary<string, object>(), body);
 
-            Assert.ThrowsException<ArgumentException>(() => handler.HandleMessage(message));
+            handler.HandleMessage(message);
+
+            Assert.AreEqual(1, mockPublisher.PublishedMessages.Count(m => m == "topic1"));
         }
 
         /// <summary>
@@ -56,9 +63,12 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             DeadLetterMonitorOptions options = new DeadLetterMonitorOptions() { MaxRetries = 2, Rules = rulesOptions };
 
+            var mockOptions = new Mock<IOptions<DeadLetterMonitorOptions>>();
+            mockOptions.Setup(c => c.Value).Returns(options);
+
             var mockPublisher = new GenericPublisherMock();
 
-            var handler = new DelayedMessageHandler(mockPublisher, mockAppInsights);
+            var handler = new DelayedMessageHandler(mockOptions.Object, mockPublisher, mockAppInsights);
 
             var msg = GetMessageArgs("topic1", "type1", "reason1");
 

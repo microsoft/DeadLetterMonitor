@@ -30,7 +30,7 @@ namespace Microsoft.DeadLetterMonitor.Subscribers {
             // ensure queues exists
             channel.QueueDeclare(queueName);
 
-            channel.Subscribe(queueName, genericMessageHandler.HandleMessage, true);
+            channel.Subscribe(queueName, genericMessageHandler.HandleMessage, false);
         }
     }
 }

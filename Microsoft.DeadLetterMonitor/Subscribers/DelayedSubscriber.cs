@@ -34,7 +34,7 @@ namespace Microsoft.DeadLetterMonitor.Subscribers {
 
             // ensure topic and queues for TTL message delay
             channel.TopicDeclare(options.DelayedTopicName);
-            channel.QueueDeclare(options.DelayedQueueName, 
+            channel.QueueDeclare(options.DelayedQueueName,
                 new Dictionary<string, object> {
                     { "x-dead-letter-exchange", options.DelayedDeadLetterTopicName },
                     { "x-message-ttl", options.DelayValue }
@@ -45,7 +45,7 @@ namespace Microsoft.DeadLetterMonitor.Subscribers {
             channel.QueueDeclare(options.DelayedDeadLetterQueueName);
             channel.QueueBind(options.DelayedDeadLetterTopicName, options.DelayedDeadLetterQueueName);
             
-            channel.Subscribe(options.DelayedDeadLetterQueueName, delayedMessageHandler.HandleMessage, true);
+            channel.Subscribe(options.DelayedDeadLetterQueueName, delayedMessageHandler.HandleMessage, false);
         }
     }
 }
