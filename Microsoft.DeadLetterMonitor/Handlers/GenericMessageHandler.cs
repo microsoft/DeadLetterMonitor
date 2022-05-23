@@ -34,10 +34,10 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         /// <inheritdoc/>
         public void HandleMessage(IMessage message)
         {
-            // The original exchange and is necessary to redirect the message
+            // The original topic and is necessary to redirect the message
             if (string.IsNullOrEmpty(message.FirstDeathTopic) || string.IsNullOrEmpty(message.FirstDeathReason))
             {
-                throw new ArgumentException("Could not find original exchange or reason in message. Possibly tried to handle a message that was not dead.");
+                throw new ArgumentException("Could not find original topic or reason in message. Possibly tried to handle a message that was not dead.");
             }
 
             // The death info is necessary to redirect the message
@@ -71,7 +71,7 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
                 {
                     // Send to parking lot
                     genericPublisher.Publish(options.ParkingLotTopicName, message.RoutingKey, message, true);
-                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "parked", message.Topic, message.RoutingKey, "Event sent to parking lot exchange.");
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "parked", message.Topic, message.RoutingKey, "Event sent to parking lot topic.");
                     return;
                 }
 
@@ -80,7 +80,7 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
                 {
                     // Send to delayed queue
                     genericPublisher.Publish(options.DelayedTopicName, message.RoutingKey, message);
-                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "delayed", message.Topic, message.RoutingKey, "Event sent to delayed exchange by rule.");
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "delayed", message.Topic, message.RoutingKey, "Event sent to delayed topic by rule.");
                     return;
                 }
 
@@ -94,14 +94,14 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
             }
         }
 
-        private bool RuleMatches(string? exchange, string messageType, string? reason, List<MonitorRule> rules)
+        private bool RuleMatches(string? topic, string messageType, string? reason, List<MonitorRule> rules)
         {
             // Check if rule matches current
-            var exchanges = rules.Any(r => r.OriginalExchange == exchange || r.OriginalExchange == "*");
+            var topics = rules.Any(r => r.OriginalTopic == topic || r.OriginalTopic == "*");
             var messageTypes = rules.Any(r => r.MessageType == messageType || r.MessageType == "*");
             var reasons = rules.Any(r => r.DeathReason == reason || r.DeathReason == "*");
 
-            return exchanges && messageTypes && reasons;
+            return topics && messageTypes && reasons;
         }
     }
 }

@@ -58,9 +58,6 @@ namespace Microsoft.DeadLetterMonitor.Connectors.AzureServiceBus {
             foreach (var header in message.Headers) {
                 sbMessage.ApplicationProperties.Add(header.Key, header.Value);
             }
-
-            // ATT: missing routing key
-            // model.BasicPublish(topicName, routingKey, true, props, message.Body);
             
             await sender.SendMessageAsync(sbMessage);
         }

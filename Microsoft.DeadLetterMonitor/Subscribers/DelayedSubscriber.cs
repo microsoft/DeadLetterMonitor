@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DeadLetterMonitor.Subscribers {
     /// <summary>
-    /// Generic exchange subscriber.
+    /// Generic delayed subscriber.
     /// </summary>
     public class DelayedSubscriber : IDelayedSubscriber 
     {
@@ -32,7 +32,7 @@ namespace Microsoft.DeadLetterMonitor.Subscribers {
         {
             var channel = connection.CreateChannel();
 
-            // ensure exchanges and queues for TTL message delay
+            // ensure topic and queues for TTL message delay
             channel.TopicDeclare(options.DelayedTopicName);
             channel.QueueDeclare(options.DelayedQueueName, 
                 new Dictionary<string, object> {

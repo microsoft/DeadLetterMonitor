@@ -19,9 +19,9 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
         {
             var rulesOptions = new DeadLetterMonitorRules
             {
-                Discard = "exchange1,type1,reason1;*,type2,reason2;exchange3,*,reason3; exchange4,type4,*;exchange5,*,*;*,type6,*;*,*,reason7",
-                Park = "exchange8,type8,reason8",
-                Retry = "exchange9,type9,reason9"
+                Discard = "topic1,type1,reason1;*,type2,reason2;topic3,*,reason3; topic4,type4,*;topic5,*,*;*,type6,*;*,*,reason7",
+                Park = "topic8,type8,reason8",
+                Retry = "topic9,type9,reason9"
             };
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
@@ -34,7 +34,7 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var body = new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
-            var message = new Message("1",  DateTime.UtcNow.ToString(), "type1", "exchange1", "key", null, new Dictionary<string, object>(), body);
+            var message = new Message("1",  DateTime.UtcNow.ToString(), "type1", "topic1", "key", null, new Dictionary<string, object>(), body);
 
             Assert.ThrowsException<ArgumentException>(() => handler.HandleMessage(message));
         }
@@ -47,9 +47,9 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
         {
             var rulesOptions = new DeadLetterMonitorRules
             {
-                Discard = "exchange1,type1,reason1;*,type2,reason2;exchange3,*,reason3; exchange4,type4,*;exchange5,*,*;*,type6,*;*,*,reason7",
-                Park = "exchange8,type8,reason8",
-                Retry = "exchange9,type9,reason9"
+                Discard = "topic1,type1,reason1;*,type2,reason2;topic3,*,reason3; topic4,type4,*;topic5,*,*;*,type6,*;*,*,reason7",
+                Park = "topic8,type8,reason8",
+                Retry = "topic9,type9,reason9"
             };
 
             var mockAppInsights = new TelemetryClient(new TelemetryConfiguration());
@@ -60,23 +60,23 @@ namespace Microsoft.DeadLetterMonitor.Tests.Handlers {
 
             var handler = new DelayedMessageHandler(mockPublisher, mockAppInsights);
 
-            var msg = GetMessageArgs("exchange1", "type1", "reason1");
+            var msg = GetMessageArgs("topic1", "type1", "reason1");
 
             handler.HandleMessage(msg);
 
             // Check if all messages are published to original queue
-            Assert.AreEqual(1, mockPublisher.PublishedMessages.Count(m => m == "exchange1"));
+            Assert.AreEqual(1, mockPublisher.PublishedMessages.Count(m => m == "topic1"));
         }
 
 
-        private IMessage GetMessageArgs(string exchangeName, string type, string reason)
+        private IMessage GetMessageArgs(string topicName, string type, string reason)
         {
             var body = new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 };
 
-            var message = new Message("1", DateTime.UtcNow.ToString(), type, "exchange1", "key", null, new Dictionary<string, object>(), body);
-
-            message.Headers.Add("x-first-death-exchange", Encoding.UTF8.GetBytes(exchangeName));
-            message.Headers.Add("x-first-death-reason", Encoding.UTF8.GetBytes(reason));
+            var message = new Message("1", DateTime.UtcNow.ToString(), type, "topic1", "key", null, new Dictionary<string, object>(), body);
+            
+            message.FirstDeathTopic = topicName;
+            message.FirstDeathReason = reason;
 
             // death info (count)
             var death = new Dictionary<string, object>

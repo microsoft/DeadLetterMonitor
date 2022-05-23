@@ -27,14 +27,10 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         /// <inheritdoc/>
         public void HandleMessage(IMessage message)
         {
-            var firstDeathExchange = message.GetHeaderValue("x-first-death-exchange");
-            var firstDeathReason = message.GetHeaderValue("x-first-death-reason");
-            var messageType = message.Type;
-
-            // The original exchange and is necessary to redirect the message
-            if (string.IsNullOrEmpty(firstDeathExchange) || string.IsNullOrEmpty(firstDeathReason))
+            // The original topic and is necessary to redirect the message
+            if (string.IsNullOrEmpty(message.FirstDeathTopic) || string.IsNullOrEmpty(message.FirstDeathReason))
             {
-                throw new ArgumentException("Could not find original exchange or reason in message. Possibly tryied to handle a message that was not dead.");
+                throw new ArgumentException("Could not find original topic or reason in message. Possibly tryied to handle a message that was not dead.");
             }
 
             // tracing in AppInsights in the context of the parent operation
@@ -44,12 +40,12 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
 
             try
             {
-                Helpers.Telemetry.Trace(telemetryClient, messageType, "received", message.Topic, message.RoutingKey, $"Event received from {firstDeathExchange} because {firstDeathReason}.");
+                Helpers.Telemetry.Trace(telemetryClient, message.Type, "received", message.Topic, message.RoutingKey, $"Event received from {message.FirstDeathTopic} because {message.FirstDeathReason}.");
 
                 // send to original queue
-                genericPublisher.Publish(firstDeathExchange, message.RoutingKey, message);
+                genericPublisher.Publish(message.FirstDeathTopic, message.RoutingKey, message);
 
-                Helpers.Telemetry.Trace(telemetryClient, messageType, "resent", message.Topic, message.RoutingKey, "Event sent to original exchange.");
+                Helpers.Telemetry.Trace(telemetryClient, message.Type, "resent", message.FirstDeathTopic, message.RoutingKey, "Event sent to original topic.");
             }
             finally 
             {

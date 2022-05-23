@@ -7,7 +7,7 @@ namespace Microsoft.DeadLetterMonitor.Publishers {
     public interface IGenericPublisher 
     {
         /// <summary>
-        /// Publishes the specified message to an exchange.
+        /// Publishes the specified message to a topic.
         /// </summary>
         /// <param name="topicName">The topic name.</param>
         /// <param name="routingKey">Routing Key.</param>
