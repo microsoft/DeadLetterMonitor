@@ -1,6 +1,8 @@
 ﻿using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.DeadLetterMonitor.Model;
 using Microsoft.DeadLetterMonitor.Publishers;
+using Microsoft.Extensions.Options;
 using System;
 
 namespace Microsoft.DeadLetterMonitor.Handlers {
@@ -11,32 +13,25 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
     public class DelayedMessageHandler : IDelayedMessageHandler 
     {
         private readonly IGenericPublisher genericPublisher;
+        private readonly DeadLetterMonitorOptions options;
         private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DelayedMessageHandler"/> class.
         /// </summary>
+        /// <param name="options">Configuration options.</param>
         /// <param name="genericPublisher">The generic bus publisher.</param>
         /// <param name="telemetryClient">Telemtry Client.</param>
-        public DelayedMessageHandler(IGenericPublisher genericPublisher, TelemetryClient telemetryClient)
+        public DelayedMessageHandler(IOptions<DeadLetterMonitorOptions> options, IGenericPublisher genericPublisher, TelemetryClient telemetryClient)
         {
             this.genericPublisher = genericPublisher;
+            this.options = options.Value;
             this.telemetryClient = telemetryClient;
         }
 
         /// <inheritdoc/>
         public void HandleMessage(IMessage message)
         {
-            var firstDeathExchange = message.GetHeaderValue("x-first-death-exchange");
-            var firstDeathReason = message.GetHeaderValue("x-first-death-reason");
-            var messageType = message.Type;
-
-            // The original exchange and is necessary to redirect the message
-            if (string.IsNullOrEmpty(firstDeathExchange) || string.IsNullOrEmpty(firstDeathReason))
-            {
-                throw new ArgumentException("Could not find original exchange or reason in message. Possibly tryied to handle a message that was not dead.");
-            }
-
             // tracing in AppInsights in the context of the parent operation
             var telemetry = new DependencyTelemetry { Type = "Event", Name = AppDomain.CurrentDomain.FriendlyName };
             telemetry.Context.Operation.Id = message.CorrelationId;
@@ -44,12 +39,23 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
 
             try
             {
-                Helpers.Telemetry.Trace(telemetryClient, messageType, "received", message.Topic, message.RoutingKey, $"Event received from {firstDeathExchange} because {firstDeathReason}.");
+                Helpers.Telemetry.Trace(telemetryClient, message.Type, "received", message.Topic, message.RoutingKey, $"Event received from {message.FirstDeathTopic} because {message.FirstDeathReason}.");
+
+                // The original topic and is necessary to redirect the message
+                if (string.IsNullOrEmpty(message.FirstDeathTopic) || string.IsNullOrEmpty(message.FirstDeathReason))
+                {
+                    Helpers.Telemetry.Trace(telemetryClient, message.Type, "error", 
+                        message.Topic, message.RoutingKey, "Could not find original topic or reason in message.");
+
+                    // if headers are missing send to parking lot
+                    genericPublisher.Publish(options.ParkingLotTopicName, message.RoutingKey, message, true);
+                    return;
+                }
 
                 // send to original queue
-                genericPublisher.Publish(firstDeathExchange, message.RoutingKey, message);
+                genericPublisher.Publish(message.FirstDeathTopic, message.RoutingKey, message);
 
-                Helpers.Telemetry.Trace(telemetryClient, messageType, "resent", message.Topic, message.RoutingKey, "Event sent to original exchange.");
+                Helpers.Telemetry.Trace(telemetryClient, message.Type, "resent", message.FirstDeathTopic, message.RoutingKey, "Event sent to original topic.");
             }
             finally 
             {

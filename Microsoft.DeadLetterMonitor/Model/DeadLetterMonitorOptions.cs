@@ -30,12 +30,12 @@
         public int DelayValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the delayed exchange.
+        /// Gets or sets the name of the delayed topic.
         /// </summary>
         /// <value>
-        /// The name of the delayed exchange.
+        /// The name of the delayed topic.
         /// </value>
-        public string DelayedExchangeName { get; set; } = string.Empty;
+        public string DelayedTopicName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the delayed queue.
@@ -46,12 +46,12 @@
         public string DelayedQueueName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the name of the delayed dead letter exchange.
+        /// Gets or sets the name of the delayed dead letter topic.
         /// </summary>
         /// <value>
-        /// The name of the delayed dead letter exchange.
+        /// The name of the delayed dead letter topic.
         /// </value>
-        public string DelayedDeadLetterExchangeName { get; set; } = string.Empty;
+        public string DelayedDeadLetterTopicName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the delayed dead letter queue.
@@ -62,12 +62,12 @@
         public string DelayedDeadLetterQueueName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the name of the parking lot exchange.
+        /// Gets or sets the name of the parking lot topic.
         /// </summary>
         /// <value>
-        /// The name of the parking lot exchange.
+        /// The name of the parking lot topic.
         /// </value>
-        public string ParkingLotExchangeName { get; set; } = string.Empty;
+        public string ParkingLotTopicName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the name of the parking lot queue.

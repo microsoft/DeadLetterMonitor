@@ -2,7 +2,6 @@
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using RabbitClient = RabbitMQ.Client;
 
 namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
@@ -45,18 +44,18 @@ namespace Microsoft.DeadLetterMonitor.Connectors.RabbitMQ {
         {
             var props = model.CreateBasicProperties();
             props.Headers = message.Headers;
-            if (message.Id != null) props.MessageId = message.Id;
+            props.DeliveryMode = 2;
+
             if (message.Type != null) props.Type = message.Type;
             if (message.CorrelationId != null) props.CorrelationId = message.CorrelationId;
-            props.DeliveryMode = 2;
 
             model.BasicPublish(topicName, routingKey, true, props, message.Body);
         }
 
         ///<inheritdoc/>
-        public IConsumer Subscribe(string queueName, Action<IMessage> handler, bool autoAck)
+        public ISubscriber Subscribe(string queueName, Action<IMessage> handler, bool autoAck)
         {
-            return new RabbitConsumer(model, queueName, handler, autoAck);
+            return new RabbitSubscriber(model, queueName, handler, autoAck);
         }
 
     }

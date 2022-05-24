@@ -6,7 +6,7 @@
     public interface IDelayedSubscriber 
     {
         /// <summary>
-        /// Subscribes the delayed exchange information.
+        /// Subscribes the delayed topic information.
         /// </summary>
         void Subscribe();
     }

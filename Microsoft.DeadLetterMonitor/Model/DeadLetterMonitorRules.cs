@@ -105,7 +105,7 @@ namespace Microsoft.DeadLetterMonitor.Model
             foreach (var rule in ruleArray)
             {
                 var ruleParams = rule.Split(",");
-                rules.Add(new MonitorRule { OriginalExchange = ruleParams[0], MessageType = ruleParams[1], DeathReason = ruleParams[2] });
+                rules.Add(new MonitorRule { OriginalTopic = ruleParams[0], MessageType = ruleParams[1], DeathReason = ruleParams[2] });
             }
 
             return rules;

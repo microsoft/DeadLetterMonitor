@@ -34,6 +34,15 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         public int? Delay { get; set; }
 
         /// <inheritdoc/>
+        public string? FirstDeathTopic { get; set; }
+
+        /// <inheritdoc/>
+        public string? FirstDeathReason { get; set; }
+
+        /// <inheritdoc/>
+        public int? DeathCount { get; set; }
+
+        /// <inheritdoc/>
         public IDictionary<string, object> Headers { get; set; }
 
         /// <inheritdoc/>
@@ -57,11 +66,12 @@ namespace Microsoft.DeadLetterMonitor.Handlers {
         /// <inheritdoc/>
         public string? GetHeaderValue(string headerName)
         {
-            if (Headers.ContainsKey(headerName))
+            if (Headers.ContainsKey(headerName) && Headers[headerName] != null)
             {
-                byte[] bytes = (byte[])Headers[headerName];
-                var value = Encoding.UTF8.GetString(bytes);
-                return value;
+                if (Headers[headerName].GetType().Name.Equals("Byte[]"))
+                    return Encoding.UTF8.GetString((byte[])Headers[headerName]);
+                else 
+                    return Headers[headerName].ToString();
             }
             else
             {

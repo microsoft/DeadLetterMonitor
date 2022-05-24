@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DeadLetterMonitor.Subscribers {
     /// <summary>
-    /// Generic exchange subscriber.
+    /// Generic delayed subscriber.
     /// </summary>
     public class DelayedSubscriber : IDelayedSubscriber 
     {
@@ -32,20 +32,20 @@ namespace Microsoft.DeadLetterMonitor.Subscribers {
         {
             var channel = connection.CreateChannel();
 
-            // ensure exchanges and queues for TTL message delay
-            channel.TopicDeclare(options.DelayedExchangeName);
-            channel.QueueDeclare(options.DelayedQueueName, 
+            // ensure topic and queues for TTL message delay
+            channel.TopicDeclare(options.DelayedTopicName);
+            channel.QueueDeclare(options.DelayedQueueName,
                 new Dictionary<string, object> {
-                    { "x-dead-letter-exchange", options.DelayedDeadLetterExchangeName },
+                    { "x-dead-letter-exchange", options.DelayedDeadLetterTopicName },
                     { "x-message-ttl", options.DelayValue }
                 });
-            channel.QueueBind(options.DelayedExchangeName, options.DelayedQueueName);
+            channel.QueueBind(options.DelayedTopicName, options.DelayedQueueName);
 
-            channel.TopicDeclare(options.DelayedDeadLetterExchangeName);
+            channel.TopicDeclare(options.DelayedDeadLetterTopicName);
             channel.QueueDeclare(options.DelayedDeadLetterQueueName);
-            channel.QueueBind(options.DelayedDeadLetterExchangeName, options.DelayedDeadLetterQueueName);
+            channel.QueueBind(options.DelayedDeadLetterTopicName, options.DelayedDeadLetterQueueName);
             
-            channel.Subscribe(options.DelayedDeadLetterQueueName, delayedMessageHandler.HandleMessage, true);
+            channel.Subscribe(options.DelayedDeadLetterQueueName, delayedMessageHandler.HandleMessage, false);
         }
     }
 }

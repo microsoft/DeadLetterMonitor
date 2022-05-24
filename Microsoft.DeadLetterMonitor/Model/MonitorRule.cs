@@ -6,12 +6,12 @@
     public class MonitorRule 
     {
         /// <summary>
-        /// Gets or sets the original exchange.
+        /// Gets or sets the original topic.
         /// </summary>
         /// <value>
-        /// The original exchange.
+        /// The original topic.
         /// </value>
-        public string OriginalExchange { get; set; } = string.Empty;
+        public string OriginalTopic { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the death reason.

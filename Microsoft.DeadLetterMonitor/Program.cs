@@ -45,15 +45,28 @@ namespace Microsoft.DeadLetterMonitor.EventProcessor {
                {
                    services.AddApplicationInsightsTelemetryWorkerService();
 
-                   services.AddSingleton<IConnection>(sp =>
+                   string messageBus = hostContext.Configuration.GetValue<string>("MessageBus");
+
+                   if (messageBus.Equals("AzureServiceBus"))
                    {
-                       return new Connectors.RabbitMQ.RabbitConnection(
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:NodesHostNames"),
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:VHost"),
-                           hostContext.Configuration.GetValue<int>("RabbitMQ:Port"),
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:Username"),
-                           hostContext.Configuration.GetValue<string>("RabbitMQ:Password"));
-                   });
+                       services.AddSingleton<IConnection>(sp =>
+                       {
+                           return new Connectors.AzureServiceBus.ServiceBusConnection(
+                               hostContext.Configuration.GetValue<string>("AzureServiceBus:Connection"));
+                       });
+                   }
+                   else if (messageBus.Equals("RabbitMQ"))
+                   {
+                       services.AddSingleton<IConnection>(sp =>
+                       {
+                           return new Connectors.RabbitMQ.RabbitConnection(
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:NodesHostNames"),
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:VHost"),
+                               hostContext.Configuration.GetValue<int>("RabbitMQ:Port"),
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:Username"),
+                               hostContext.Configuration.GetValue<string>("RabbitMQ:Password"));
+                       });
+                   }
 
                    services.AddScoped<IHostedService, TimedHostedService>();
                    services.AddScoped<IGenericMessageHandler, GenericMessageHandler>();

@@ -16,16 +16,16 @@ namespace Microsoft.DeadLetterMonitor.Tests
         {
             var rulesOptions = new DeadLetterMonitorRules
             {
-                Discard = "exchange1,type1,reason1;exchange2,type2,reason2;exchange3,type3,reason3",
-                Park = "exchange1,type1,reason1;exchange2,type2,reason2;exchange3,type3,reason3",
-                Retry = "exchange1,type1,reason1;exchange2,type2,reason2;exchange3,type3,reason3"
+                Discard = "topic1,type1,reason1;topic2,type2,reason2;topic3,type3,reason3",
+                Park = "topic1,type1,reason1;topic2,type2,reason2;topic3,type3,reason3",
+                Retry = "topic1,type1,reason1;topic2,type2,reason2;topic3,type3,reason3"
             };
 
             Assert.AreEqual(3, rulesOptions.DiscardRules.Count);
             Assert.AreEqual(3, rulesOptions.DiscardRules.Count);
             Assert.AreEqual(3, rulesOptions.DiscardRules.Count);
 
-            Assert.AreEqual("exchange1", rulesOptions.DiscardRules[0].OriginalExchange);
+            Assert.AreEqual("topic1", rulesOptions.DiscardRules[0].OriginalTopic);
             Assert.AreEqual("type1", rulesOptions.DiscardRules[0].MessageType);
             Assert.AreEqual("reason1", rulesOptions.DiscardRules[0].DeathReason);
         }

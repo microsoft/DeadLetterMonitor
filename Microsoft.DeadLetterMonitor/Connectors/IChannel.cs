@@ -43,6 +43,6 @@ namespace Microsoft.DeadLetterMonitor.Connectors {
         /// <param name="queueName">Queue name</param>
         /// <param name="handler">Method handler to process messages</param>
         /// <param name="autoAck">Auto Ack message</param>
-        IConsumer Subscribe(string queueName, Action<IMessage> handler, bool autoAck);
+        ISubscriber Subscribe(string queueName, Action<IMessage> handler, bool autoAck);
     }
 }

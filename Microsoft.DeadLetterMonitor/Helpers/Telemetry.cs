@@ -13,12 +13,12 @@ namespace Microsoft.DeadLetterMonitor.Helpers {
         /// <param name="telemetryClient">The telemetry client instance.</param>
         /// <param name="eventType">The event type.</param>
         /// <param name="action">Action performed.</param>
-        /// <param name="exchangeName">The Exchange name.</param>
+        /// <param name="topicName">The Topic name.</param>
         /// <param name="routingKey">The routing key.</param>
         /// <param name="logInfo">The information to log.</param>
-        internal static void Trace(TelemetryClient telemetryClient, string eventType, string action, string exchangeName, string routingKey, string logInfo)
+        internal static void Trace(TelemetryClient telemetryClient, string eventType, string action, string topicName, string routingKey, string logInfo)
         {
-            string trace = $"Exchange: {exchangeName} | RoutingKey: {routingKey} | Info: {logInfo}";
+            string trace = $"Topic: {topicName} | RoutingKey: {routingKey} | Info: {logInfo}";
             telemetryClient.TrackDependency("Action", $"{eventType} {action} ", trace, DateTime.UtcNow, new TimeSpan(0, 0, 0), true);
         }
     }
